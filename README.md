@@ -1,5 +1,5 @@
 # nice-zookeeper
-Zookeeper客户端Curator的封装
+ZooKeeper客户端Curator的封装，ZooKeeper需要3.5.x版本
 
 使用方法如下：
 
