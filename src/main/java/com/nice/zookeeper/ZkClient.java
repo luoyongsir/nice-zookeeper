@@ -5,6 +5,7 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.CuratorFrameworkFactory.Builder;
 import org.apache.curator.framework.recipes.cache.NodeCache;
+import org.apache.curator.framework.recipes.cache.PathChildrenCache;
 import org.apache.curator.framework.state.ConnectionState;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
@@ -161,9 +162,9 @@ public class ZkClient {
 	}
 
 	/**
-	 * 监听节点数据变化，节点数据变化时，执行ZkNodeChangeCallBack回调方法。
+	 * 监听节点数据变化，节点数据变化时，执行ZkNodeChangeCallBack回调方法
 	 * @param path 节点，不能为空
-	 * @param callBack 内容变化后回调 callBack.execute 方法，不能为空
+	 * @param callBack 内容变化后回调 execNode 方法，不能为空
 	 * @throws Exception
 	 */
 	public void addNodeListener(final String path, final ZkNodeChangeCallBack callBack) throws Exception {
@@ -171,9 +172,9 @@ public class ZkClient {
 	}
 
 	/**
-	 * 监听节点数据变化，节点数据变化时，执行ZkNodeChangeCallBack回调方法。
+	 * 监听节点数据变化，节点数据变化时，执行ZkNodeChangeCallBack回调方法
 	 * @param path 节点，不能为空
-	 * @param callBack 内容变化后回调 callBack.execute 方法，不能为空
+	 * @param callBack 内容变化后回调 execNode 方法，不能为空
 	 * @param params 回调函数的额外参数，可以为空
 	 * @throws Exception
 	 */
@@ -184,7 +185,24 @@ public class ZkClient {
 		}
 		final NodeCache cache = new NodeCache(curator, path);
 		cache.start(true);
-		cache.getListenable().addListener(() -> callBack.execute(curator, cache, params));
+		cache.getListenable().addListener(() -> callBack.execNode(curator, cache, params));
+	}
+
+	/**
+	 * 监听子节点变化，子节点变化时，执行ZkNodeChangeCallBack回调方法
+	 * @param path 节点，不能为空
+	 * @param callBack 子节点变化时回调 execChildNode 方法，不能为空
+	 * @param params 回调函数的额外参数，可以为空
+	 * @throws Exception
+	 */
+	public void addChildNodeListener(final String path, final ZkNodeChangeCallBack callBack,
+			final Map<String, Object> params) throws Exception {
+		if (!exists(path) || callBack == null) {
+			return;
+		}
+		final PathChildrenCache cache = new PathChildrenCache(curator, path, true);
+		cache.start();
+		cache.getListenable().addListener((curator, event) -> callBack.execChildNode(curator, event, params));
 	}
 
 	private final List<ZkStateListener> stateListeners = new ArrayList<>();
