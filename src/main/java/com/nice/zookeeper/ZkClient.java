@@ -76,7 +76,7 @@ public class ZkClient {
 	 * @return
 	 */
 	public String setData(String path, String data) {
-		return setData(path, data.getBytes(StandardCharsets.UTF_8), null);
+		return setData(path, data, null);
 	}
 
 	/**
