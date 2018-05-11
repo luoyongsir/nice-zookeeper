@@ -27,7 +27,7 @@ pom.xml 依赖添加
 添加配置
 
 #zookeeper 可选配置<br/>
-zookeeper.maxRetries=10<br/>
+zookeeper.maxRetries=3<br/>
 zookeeper.baseSleepTimeMs=1000<br/>
 zookeeper.sessionTimeoutMs=60000<br/>
 zookeeper.connectionTimeoutMs=15000<br/>
