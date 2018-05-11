@@ -5,6 +5,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
+ * 通过spring 读取配置文件
+ *
  * @author Luo Yong
  * @date 2017-03-12
  */

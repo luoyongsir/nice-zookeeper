@@ -1,7 +1,7 @@
 package com.nice.zookeeper;
 
 /**
- * 监控一个ZNode，或者ZNode的子节点，默认实现类
+ * 监控一个ZNode或者ZNode的子节点回调函数的默认实现
  * @author Luo Yong
  * @date 2017-03-12
  */

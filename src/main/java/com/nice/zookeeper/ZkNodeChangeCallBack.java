@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
- * 监控一个ZNode，或者ZNode的子节点
+ * 监控一个ZNode或者ZNode的子节点的回调函数
  *
  * @author Luo Yong
  * @date 2017-03-12
