@@ -16,7 +16,6 @@ import org.springframework.util.StringUtils;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Luo Yong
@@ -165,44 +164,36 @@ public class ZkClient {
 	 * 监听节点数据变化，节点数据变化时，执行ZkNodeChangeCallBack回调方法
 	 * @param path 节点，不能为空
 	 * @param callBack 内容变化后回调 execNode 方法，不能为空
-	 * @throws Exception
 	 */
-	public void addNodeListener(final String path, final ZkNodeChangeCallBack callBack) throws Exception {
-		addNodeListener(path, callBack, null);
-	}
-
-	/**
-	 * 监听节点数据变化，节点数据变化时，执行ZkNodeChangeCallBack回调方法
-	 * @param path 节点，不能为空
-	 * @param callBack 内容变化后回调 execNode 方法，不能为空
-	 * @param params 回调函数的额外参数，可以为空
-	 * @throws Exception
-	 */
-	public void addNodeListener(final String path, final ZkNodeChangeCallBack callBack, final Map<String, Object> params)
-			throws Exception {
-		if (!exists(path) || callBack == null) {
-			return;
+	public void addNodeListener(final String path, final ZkNodeChangeCallBack callBack) {
+		try {
+			if (!exists(path) || callBack == null) {
+				return;
+			}
+			final NodeCache cache = new NodeCache(curator, path);
+			cache.start(true);
+			cache.getListenable().addListener(() -> callBack.execNode(curator, cache));
+		} catch (Exception e) {
+			LOG.error("注册节点 {} 监听失败：", path, e);
 		}
-		final NodeCache cache = new NodeCache(curator, path);
-		cache.start(true);
-		cache.getListenable().addListener(() -> callBack.execNode(curator, cache, params));
 	}
 
 	/**
 	 * 监听子节点变化，子节点变化时，执行ZkNodeChangeCallBack回调方法
 	 * @param path 节点，不能为空
 	 * @param callBack 子节点变化时回调 execChildNode 方法，不能为空
-	 * @param params 回调函数的额外参数，可以为空
-	 * @throws Exception
 	 */
-	public void addChildNodeListener(final String path, final ZkNodeChangeCallBack callBack,
-			final Map<String, Object> params) throws Exception {
-		if (!exists(path) || callBack == null) {
-			return;
+	public void addChildNodeListener(final String path, final ZkNodeChangeCallBack callBack) {
+		try {
+			if (!exists(path) || callBack == null) {
+				return;
+			}
+			final PathChildrenCache cache = new PathChildrenCache(curator, path, true);
+			cache.start();
+			cache.getListenable().addListener((curator, event) -> callBack.execChildNode(curator, event));
+		} catch (Exception e) {
+			LOG.error("注册节点 {} 的子节点监听失败：", path, e);
 		}
-		final PathChildrenCache cache = new PathChildrenCache(curator, path, true);
-		cache.start();
-		cache.getListenable().addListener((curator, event) -> callBack.execChildNode(curator, event, params));
 	}
 
 	private final List<ZkStateListener> stateListeners = new ArrayList<>();

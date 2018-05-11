@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 /**
  * 监控一个ZNode或者ZNode的子节点的回调函数
@@ -26,9 +25,8 @@ public interface ZkNodeChangeCallBack {
 	 * @param curator
 	 * @param cache 
 	 *            得到节点当前的状态：cache.getCurrentData()；得到当前的值：cache.getCurrentData().getData()
-	 * @param params 回调函数的额外参数，可以为空
 	 */
-	default void execNode(CuratorFramework curator, NodeCache cache, Map<String, Object> params) {
+	default void execNode(CuratorFramework curator, NodeCache cache) {
 		// 默认打印数据
 		if (cache.getCurrentData() != null) {
 			LOG.info("Node changed: " + cache.getCurrentData().getPath() + ", value: "
@@ -41,9 +39,8 @@ public interface ZkNodeChangeCallBack {
 	 *
 	 * @param curator
 	 * @param event
-	 * @param params 回调函数的额外参数，可以为空
 	 */
-	default void execChildNode(CuratorFramework curator, PathChildrenCacheEvent event, Map<String, Object> params) {
+	default void execChildNode(CuratorFramework curator, PathChildrenCacheEvent event) {
 		String path = ZKPaths.getNodeFromPath(event.getData().getPath());
 		String data = new String(event.getData().getData(), StandardCharsets.UTF_8);
 		switch (event.getType()) {
