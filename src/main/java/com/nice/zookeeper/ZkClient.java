@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Zookeeper操作工具类
+ *
  * @author Luo Yong
  * @date 2017-03-12
  */
