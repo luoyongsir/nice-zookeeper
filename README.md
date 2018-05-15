@@ -8,7 +8,7 @@ pom.xml 依赖添加
     <dependency>
         <groupId>com.nice</groupId>
         <artifactId>nice-zookeeper</artifactId>
-        <version>current.version</version>
+        <version>latest.version</version>
     </dependency>
     
     <dependency>
