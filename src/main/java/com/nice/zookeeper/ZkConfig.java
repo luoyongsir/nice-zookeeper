@@ -26,8 +26,7 @@ public class ZkConfig {
 
 	@Bean(initMethod = "init", destroyMethod = "stop")
 	public ZkClient zkClient() {
-		ZkClient zkClient = new ZkClient(this);
-		return zkClient;
+		return new ZkClient(this);
 	}
 
 	public String getAddress() {

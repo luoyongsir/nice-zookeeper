@@ -72,7 +72,7 @@ public class ZkClient {
 
 	/**
 	 * 给节点设置值，如果节点不存在，则自动创建持久化节点
-	 * @param path
+	 * @param path 节点路径
 	 * @param data
 	 * @return
 	 */
@@ -82,8 +82,8 @@ public class ZkClient {
 
 	/**
 	 * 给节点设置值，如果节点不存在，则自动创建 mode 类型（默认为持久化类型）的节点
-	 * @param path
-	 * @param data
+	 * @param path 节点路径
+	 * @param data 节点数据
 	 * @param mode
 	 * @return
 	 */
@@ -99,12 +99,12 @@ public class ZkClient {
 	}
 
 	/**
-	 * @param path
-	 * @param data
+	 * @param path 节点路径
+	 * @param data 节点数据
 	 * @param mode
 	 * @return 返回真正写到的路径，如果出错则返回null
 	 */
-	private String setData(String path, byte[] data, CreateMode mode) {
+	public String setData(String path, byte[] data, CreateMode mode) {
 		String zkPath = path;
 		try {
 			if (curator.checkExists().forPath(path) == null) {
@@ -121,7 +121,7 @@ public class ZkClient {
 
 	/**
 	 * 获取节点数据
-	 * @param path
+	 * @param path 节点路径
 	 * @return
 	 */
 	public String getData(String path) {
@@ -138,7 +138,7 @@ public class ZkClient {
 
 	/**
 	 * 获取指定节点下的子节点列表
-	 * @param path
+	 * @param path 节点路径
 	 * @return
 	 */
 	public List<String> getChildren(String path) {
@@ -149,12 +149,12 @@ public class ZkClient {
 		} catch (Exception e) {
 			LOG.error("获取子节点出错", e);
 		}
-		return null;
+		return new ArrayList<>();
 	}
 
 	/**
 	 * 判断节点是否存在
-	 * @param path
+	 * @param path 节点路径
 	 * @return
 	 * @throws Exception
 	 */
@@ -163,11 +163,11 @@ public class ZkClient {
 	}
 
 	/**
-	 * 监听节点数据变化，节点数据变化时，执行ZkNodeChangeCallBack回调方法
+	 * 监听节点数据变化，节点数据变化时，执行ZkListenerCallBack回调方法
 	 * @param path 节点，不能为空
 	 * @param callBack 内容变化后回调 execNode 方法，不能为空
 	 */
-	public void addNodeListener(final String path, final ZkNodeChangeCallBack callBack) {
+	public void addNodeListener(final String path, final ZkListenerCallBack callBack) {
 		try {
 			if (!exists(path) || callBack == null) {
 				return;
@@ -181,18 +181,18 @@ public class ZkClient {
 	}
 
 	/**
-	 * 监听子节点变化，子节点变化时，执行ZkNodeChangeCallBack回调方法
+	 * 监听子节点变化，子节点变化时，执行ZkListenerCallBack回调方法
 	 * @param path 节点，不能为空
 	 * @param callBack 子节点变化时回调 execChildNode 方法，不能为空
 	 */
-	public void addChildNodeListener(final String path, final ZkNodeChangeCallBack callBack) {
+	public void addChildNodeListener(final String path, final ZkListenerCallBack callBack) {
 		try {
 			if (!exists(path) || callBack == null) {
 				return;
 			}
 			final PathChildrenCache cache = new PathChildrenCache(curator, path, true);
 			cache.start();
-			cache.getListenable().addListener((curator, event) -> callBack.execChildNode(curator, event));
+			cache.getListenable().addListener((client, event) -> callBack.execChildNode(client, event));
 		} catch (Exception e) {
 			LOG.error("注册节点 {} 的子节点监听失败：", path, e);
 		}
