@@ -15,9 +15,9 @@ import java.nio.charset.StandardCharsets;
  * @author Luo Yong
  * @date 2017-03-12
  */
-public interface ZkNodeChangeCallBack {
+public interface ZkListenerCallBack {
 
-	Logger LOG = LoggerFactory.getLogger(ZkNodeChangeCallBack.class.getName());
+	Logger LOG = LoggerFactory.getLogger(ZkListenerCallBack.class.getName());
 
 	/**
 	 * 监控一个ZNode. 当节点的数据修改或者删除时的回调函数
