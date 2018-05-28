@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * 1.监控一个ZNode或者ZNode的子节点的回调函数
- * 2.选择一个 leader 后回调执行任务
+ * 2.选择一个leader后回调执行任务
  *
  * @author Luo Yong
  * @date 2017-03-12
@@ -61,13 +61,13 @@ public interface ZkCallBack {
 	}
 
 	/**
-	 * 选择一个 leader 后回调执行任务
+	 * 选择一个leader后回调执行任务
 	 *
 	 * @param curator
 	 * @param obj
 	 */
 	default void execTask(CuratorFramework curator, Object... obj) {
-		LOG.info(" Become a leader");
+		LOG.info(" Become a leader ");
 		LOG.info(" Do the task…… ");
 		LOG.info(" Complete the task and become non-leader ");
 	}
