@@ -5,6 +5,6 @@ package com.nice.zookeeper;
  * @author Luo Yong
  * @date 2017-03-12
  */
-public class ZkListenerCallBackDef implements ZkListenerCallBack {
+public class ZkCallBackDef implements ZkCallBack {
 
 }
