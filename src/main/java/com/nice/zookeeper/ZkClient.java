@@ -6,6 +6,8 @@ import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.CuratorFrameworkFactory.Builder;
 import org.apache.curator.framework.recipes.cache.NodeCache;
 import org.apache.curator.framework.recipes.cache.PathChildrenCache;
+import org.apache.curator.framework.recipes.leader.LeaderSelector;
+import org.apache.curator.framework.recipes.leader.LeaderSelectorListenerAdapter;
 import org.apache.curator.framework.state.ConnectionState;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
@@ -72,6 +74,7 @@ public class ZkClient {
 
 	/**
 	 * 给节点设置值，如果节点不存在，则自动创建持久化节点
+	 *
 	 * @param path 节点路径
 	 * @param data
 	 * @return
@@ -82,6 +85,7 @@ public class ZkClient {
 
 	/**
 	 * 给节点设置值，如果节点不存在，则自动创建 mode 类型（默认为持久化类型）的节点
+	 *
 	 * @param path 节点路径
 	 * @param data 节点数据
 	 * @param mode
@@ -121,6 +125,7 @@ public class ZkClient {
 
 	/**
 	 * 获取节点数据
+	 *
 	 * @param path 节点路径
 	 * @return
 	 */
@@ -138,6 +143,7 @@ public class ZkClient {
 
 	/**
 	 * 获取指定节点下的子节点列表
+	 *
 	 * @param path 节点路径
 	 * @return
 	 */
@@ -154,6 +160,7 @@ public class ZkClient {
 
 	/**
 	 * 判断节点是否存在
+	 *
 	 * @param path 节点路径
 	 * @return
 	 * @throws Exception
@@ -164,17 +171,18 @@ public class ZkClient {
 
 	/**
 	 * 监听节点数据变化，节点数据变化时，执行ZkListenerCallBack回调方法
-	 * @param path 节点，不能为空
-	 * @param callBack 内容变化后回调 execNode 方法，不能为空
+	 *
+	 * @param path     节点，不能为空
+	 * @param callBack 内容变化后回调 listenerNode 方法，不能为空
 	 */
-	public void addNodeListener(final String path, final ZkListenerCallBack callBack) {
+	public void addNodeListener(final String path, final ZkCallBack callBack) {
 		try {
 			if (!exists(path) || callBack == null) {
 				return;
 			}
 			final NodeCache cache = new NodeCache(curator, path);
 			cache.start(true);
-			cache.getListenable().addListener(() -> callBack.execNode(curator, cache));
+			cache.getListenable().addListener(() -> callBack.listenerNode(curator, cache));
 		} catch (Exception e) {
 			LOG.error("注册节点 {} 监听失败：", path, e);
 		}
@@ -182,19 +190,47 @@ public class ZkClient {
 
 	/**
 	 * 监听子节点变化，子节点变化时，执行ZkListenerCallBack回调方法
-	 * @param path 节点，不能为空
-	 * @param callBack 子节点变化时回调 execChildNode 方法，不能为空
+	 *
+	 * @param path     节点，不能为空
+	 * @param callBack 子节点变化时回调 listenerChildNode 方法，不能为空
 	 */
-	public void addChildNodeListener(final String path, final ZkListenerCallBack callBack) {
+	public void addChildNodeListener(final String path, final ZkCallBack callBack) {
 		try {
 			if (!exists(path) || callBack == null) {
 				return;
 			}
 			final PathChildrenCache cache = new PathChildrenCache(curator, path, true);
 			cache.start();
-			cache.getListenable().addListener((client, event) -> callBack.execChildNode(client, event));
+			cache.getListenable().addListener((client, event) -> callBack.listenerChildNode(client, event));
 		} catch (Exception e) {
 			LOG.error("注册节点 {} 的子节点监听失败：", path, e);
+		}
+	}
+
+	/**
+	 * 在 path 节点下选择一个 leader 执行任务，任务完成后释放 leader
+	 *
+	 * @param path     节点，不能为空
+	 * @param callBack 子节点变化时回调 listenerChildNode 方法，不能为空
+	 * @param obj      回调方法 execTask 的参数，可以为空
+	 */
+	public void takeLeaderAndExecTask(final String path, final ZkCallBack callBack, Object... obj) {
+		try {
+			if (!exists(path) || callBack == null) {
+				return;
+			}
+		} catch (Exception e) {
+			LOG.error("注册节点 {} 的子节点监听失败，参数错误：", path, e);
+		}
+		LeaderSelectorListenerAdapter listener = new LeaderSelectorListenerAdapter() {
+
+			@Override public void takeLeadership(CuratorFramework curatorFramework) {
+				callBack.execTask(curatorFramework, obj);
+			}
+		};
+		try (LeaderSelector leader = new LeaderSelector(curator, path, listener)) {
+			leader.autoRequeue();
+			leader.start();
 		}
 	}
 
