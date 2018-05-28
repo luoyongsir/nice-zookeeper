@@ -10,14 +10,15 @@ import org.slf4j.LoggerFactory;
 import java.nio.charset.StandardCharsets;
 
 /**
- * 监控一个ZNode或者ZNode的子节点的回调函数
+ * 1.监控一个ZNode或者ZNode的子节点的回调函数
+ * 2.选择一个 leader 后回调执行任务
  *
  * @author Luo Yong
  * @date 2017-03-12
  */
-public interface ZkListenerCallBack {
+public interface ZkCallBack {
 
-	Logger LOG = LoggerFactory.getLogger(ZkListenerCallBack.class.getName());
+	Logger LOG = LoggerFactory.getLogger(ZkCallBack.class.getName());
 
 	/**
 	 * 监控一个ZNode. 当节点的数据修改或者删除时的回调函数
@@ -26,7 +27,7 @@ public interface ZkListenerCallBack {
 	 * @param cache 
 	 *            得到节点当前的状态：cache.getCurrentData()；得到当前的值：cache.getCurrentData().getData()
 	 */
-	default void execNode(CuratorFramework curator, NodeCache cache) {
+	default void listenerNode(CuratorFramework curator, NodeCache cache) {
 		// 默认打印数据
 		if (cache.getCurrentData() != null) {
 			LOG.info("Node changed: " + cache.getCurrentData().getPath() + ", value: "
@@ -40,7 +41,7 @@ public interface ZkListenerCallBack {
 	 * @param curator
 	 * @param event
 	 */
-	default void execChildNode(CuratorFramework curator, PathChildrenCacheEvent event) {
+	default void listenerChildNode(CuratorFramework curator, PathChildrenCacheEvent event) {
 		String path = ZKPaths.getNodeFromPath(event.getData().getPath());
 		String data = new String(event.getData().getData(), StandardCharsets.UTF_8);
 		switch (event.getType()) {
@@ -57,5 +58,17 @@ public interface ZkListenerCallBack {
 				LOG.info(event.toString() + path + " data " + data);
 				break;
 		}
+	}
+
+	/**
+	 * 选择一个 leader 后回调执行任务
+	 *
+	 * @param curator
+	 * @param obj
+	 */
+	default void execTask(CuratorFramework curator, Object... obj) {
+		LOG.info(" Become a leader");
+		LOG.info(" Do the task…… ");
+		LOG.info(" Complete the task and become non-leader ");
 	}
 }
