@@ -159,6 +159,33 @@ public class ZkClient {
 	}
 
 	/**
+	 * 删除节点，并递归删除其所有子节点
+	 *
+	 * @param path 节点路径
+	 */
+	public void delete(String path) {
+		delete(path, false);
+	}
+
+	/**
+	 * 删除节点，并递归删除其所有子节点
+	 *
+	 * @param path  节点路径
+	 * @param guaranteed 是否保证删除
+	 */
+	public void delete(String path, boolean guaranteed) {
+		try {
+			if (guaranteed) {
+				curator.delete().guaranteed().deletingChildrenIfNeeded().forPath(path);
+			} else {
+				curator.delete().deletingChildrenIfNeeded().forPath(path);
+			}
+		} catch (Exception e) {
+			LOG.error("删除节点出错", e);
+		}
+	}
+
+	/**
 	 * 判断节点是否存在
 	 *
 	 * @param path 节点路径
@@ -224,7 +251,8 @@ public class ZkClient {
 		}
 		LeaderSelectorListenerAdapter listener = new LeaderSelectorListenerAdapter() {
 
-			@Override public void takeLeadership(CuratorFramework curatorFramework) {
+			@Override
+			public void takeLeadership(CuratorFramework curatorFramework) {
 				callBack.execTask(curatorFramework, obj);
 			}
 		};
@@ -233,6 +261,7 @@ public class ZkClient {
 			leader.start();
 		}
 	}
+
 
 	private final List<ZkStateListener> stateListeners = new ArrayList<>();
 
