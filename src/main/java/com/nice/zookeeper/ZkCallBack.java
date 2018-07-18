@@ -24,14 +24,14 @@ public interface ZkCallBack {
 	 * 监控一个ZNode. 当节点的数据修改或者删除时的回调函数
 	 *
 	 * @param curator
-	 * @param cache 
+	 * @param cache
 	 *            得到节点当前的状态：cache.getCurrentData()；得到当前的值：cache.getCurrentData().getData()
 	 */
 	default void listenerNode(CuratorFramework curator, NodeCache cache) {
 		// 默认打印数据
 		if (cache.getCurrentData() != null) {
-			LOG.info("Node changed: " + cache.getCurrentData().getPath() + ", value: "
-					+ new String(cache.getCurrentData().getData(), StandardCharsets.UTF_8));
+			LOG.info("Node changed: " + cache.getCurrentData().getPath() + ", value: " + new String(
+					cache.getCurrentData().getData(), StandardCharsets.UTF_8));
 		}
 	}
 
